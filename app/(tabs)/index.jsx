@@ -55,7 +55,7 @@ export default function LoginScreen() {
       <Animated.View style={[styles.logoContainer, animatedLogoStyle]}>
         <View style={[styles.logo, { width: logoSize, height: logoSize }]}>
           <Image
-            source={{ uri: "/assets/images/logo.png" }}
+            source={require("../../assets/images/logo.png")}
             style={{ width: logoImageSize, height: logoImageSize }}
             resizeMode="contain"
           />
