@@ -37,9 +37,10 @@ const LoginPage = () => {
         password: formData.password,
       });
       await AsyncStorage.setItem("token", response.data.token);
-      router.replace("(tabs)");
+      router.replace("../(tabs)/Home/index1");
     } catch (error) {
-      const errorMessage = error.response?.data?.error || "Invalid credentials. Please try again.";
+      const errorMessage =
+        error.response?.data?.error || "Invalid credentials. Please try again.";
       setMessage(errorMessage);
     } finally {
       setLoading(false);
@@ -47,19 +48,34 @@ const LoginPage = () => {
   };
 
   return (
-    <Animatable.View animation="fadeInUp" duration={1000} style={styles.container}>
-      <Animatable.Text animation="fadeInDown" duration={1000} style={styles.appTitle}>
+    <Animatable.View
+      animation="fadeInUp"
+      duration={1000}
+      style={styles.container}
+    >
+      <Animatable.Text
+        animation="fadeInDown"
+        duration={1000}
+        style={styles.appTitle}
+      >
         The Lingua Learner App
       </Animatable.Text>
 
       <Animatable.View
         animation="zoomIn"
         duration={1000}
-        style={[styles.loginContainer, isLargeScreen && styles.loginContainerLarge]}
+        style={[
+          styles.loginContainer,
+          isLargeScreen && styles.loginContainerLarge,
+        ]}
       >
         <Text style={styles.loginTitle}>Login</Text>
 
-        <Animatable.View animation="fadeInLeft" duration={1500} style={styles.inputContainer}>
+        <Animatable.View
+          animation="fadeInLeft"
+          duration={1500}
+          style={styles.inputContainer}
+        >
           <TextInput
             style={styles.input}
             placeholder="Email"
@@ -74,14 +90,24 @@ const LoginPage = () => {
             placeholderTextColor="#BDBDBD"
             secureTextEntry
             value={formData.password}
-            onChangeText={(text) => setFormData({ ...formData, password: text })}
+            onChangeText={(text) =>
+              setFormData({ ...formData, password: text })
+            }
           />
         </Animatable.View>
 
         {message ? <Text style={styles.message}>{message}</Text> : null}
 
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin} disabled={loading}>
-          <Animatable.Text animation="bounceIn" duration={1000} style={styles.loginButtonText}>
+        <TouchableOpacity
+          style={styles.loginButton}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Animatable.Text
+            animation="bounceIn"
+            duration={1000}
+            style={styles.loginButtonText}
+          >
             {loading ? "Loading..." : "Login"}
           </Animatable.Text>
         </TouchableOpacity>
