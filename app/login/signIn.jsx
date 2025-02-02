@@ -37,7 +37,7 @@ const LoginPage = () => {
         password: formData.password,
       });
       await AsyncStorage.setItem("token", response.data.token);
-      router.replace("../(tabs)/Home/index1");
+      router.replace("../(tabs)/index1");
     } catch (error) {
       const errorMessage =
         error.response?.data?.error || "Invalid credentials. Please try again.";
