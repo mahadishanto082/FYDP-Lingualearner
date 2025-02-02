@@ -11,14 +11,20 @@ import {
 import { useRouter } from "expo-router";
 import * as Animatable from "react-native-animatable";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import apiClient from "../services/api"; 
+import apiClient from "../services/api";
 
 const { width } = Dimensions.get("window");
 const isLargeScreen = width > 768;
 
 const SignupPage = () => {
   const router = useRouter();
-  const [formData, setFormData] = useState({ email: "", password: "", confirmPassword: "", name: "", phone: "" });
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    confirmPassword: "",
+    name: "",
+    phone: "",
+  });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -26,7 +32,13 @@ const SignupPage = () => {
     setLoading(true);
     setMessage("");
 
-    if (!formData.email || !formData.password || !formData.confirmPassword || !formData.name || !formData.phone) {
+    if (
+      !formData.email ||
+      !formData.password ||
+      !formData.confirmPassword ||
+      !formData.name ||
+      !formData.phone
+    ) {
       setMessage("All fields are required.");
       setLoading(false);
       return;
@@ -55,7 +67,8 @@ const SignupPage = () => {
       setMessage("User registered successfully! Please login.");
       router.push("login/signIn");
     } catch (error) {
-      const errorMessage = error.response?.data?.error || "An error occurred. Please try again.";
+      const errorMessage =
+        error.response?.data?.error || "An error occurred. Please try again.";
       setMessage(errorMessage);
     } finally {
       setLoading(false);
@@ -63,19 +76,34 @@ const SignupPage = () => {
   };
 
   return (
-    <Animatable.View animation="fadeInUp" duration={1000} style={styles.container}>
-      <Animatable.Text animation="fadeInDown" duration={1000} style={styles.appTitle}>
+    <Animatable.View
+      animation="fadeInUp"
+      duration={1000}
+      style={styles.container}
+    >
+      <Animatable.Text
+        animation="fadeInDown"
+        duration={1000}
+        style={styles.appTitle}
+      >
         The Lingua Learner App
       </Animatable.Text>
 
       <Animatable.View
         animation="zoomIn"
         duration={1000}
-        style={[styles.signupContainer, isLargeScreen && styles.signupContainerLarge]}
+        style={[
+          styles.signupContainer,
+          isLargeScreen && styles.signupContainerLarge,
+        ]}
       >
         <Text style={styles.signupTitle}>Sign Up</Text>
 
-        <Animatable.View animation="fadeInLeft" duration={1500} style={styles.inputContainer}>
+        <Animatable.View
+          animation="fadeInLeft"
+          duration={1500}
+          style={styles.inputContainer}
+        >
           <TextInput
             style={styles.input}
             placeholder="Name"
@@ -105,7 +133,9 @@ const SignupPage = () => {
             placeholderTextColor="#BDBDBD"
             secureTextEntry
             value={formData.password}
-            onChangeText={(text) => setFormData({ ...formData, password: text })}
+            onChangeText={(text) =>
+              setFormData({ ...formData, password: text })
+            }
           />
           <TextInput
             style={styles.input}
@@ -113,14 +143,24 @@ const SignupPage = () => {
             placeholderTextColor="#BDBDBD"
             secureTextEntry
             value={formData.confirmPassword}
-            onChangeText={(text) => setFormData({ ...formData, confirmPassword: text })}
+            onChangeText={(text) =>
+              setFormData({ ...formData, confirmPassword: text })
+            }
           />
         </Animatable.View>
 
         {message ? <Text style={styles.message}>{message}</Text> : null}
 
-        <TouchableOpacity style={styles.signupButton} onPress={handleSignup} disabled={loading}>
-          <Animatable.Text animation="bounceIn" duration={1000} style={styles.signupButtonText}>
+        <TouchableOpacity
+          style={styles.signupButton}
+          onPress={handleSignup}
+          disabled={loading}
+        >
+          <Animatable.Text
+            animation="bounceIn"
+            duration={1000}
+            style={styles.signupButtonText}
+          >
             {loading ? "Loading..." : "Sign Up"}
           </Animatable.Text>
         </TouchableOpacity>

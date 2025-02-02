@@ -21,16 +21,15 @@ const LanguageDashboard = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   const languages = [
-    { id: 1, name: "English", flag: "🇬🇧", progress: 0 },
-    { id: 2, name: "Japanese", flag: "🇯🇵", progress: 0 },
-    { id: 3, name: "German", flag: "🇩🇪", progress: 0 },
-    { id: 4, name: "Spanish", flag: "🇪🇸", progress: 0 },
-    { id: 5, name: "Arabic", flag: "🇸🇪", progress: 0 },
-    { id: 6, name: "Bangla", flag: "🇧🇩", progress: 0 },
-    { id: 7, name: "Mandarin", flag: "🇨🇳", progress: 0 },
-    { id: 8, name: "Russian", flag: "🇷🇺", progress: 0 },
-    { id: 9, name: "Hindi", flag: "🇮🇳", progress: 0 },
-    { id: 10, name: "Portuguese", flag: "🇧🇷", progress: 0 },
+    { id: 1, name: "Japanese", flag: "🇯🇵", progress: 0 },
+    { id: 2, name: "German", flag: "🇩🇪", progress: 0 },
+    { id: 3, name: "Spanish", flag: "🇪🇸", progress: 0 },
+    { id: 4, name: "Arabic", flag: "🇸🇪", progress: 0 },
+    { id: 5, name: "Bangla", flag: "🇧🇩", progress: 0 },
+    { id: 6, name: "Mandarin", flag: "🇨🇳", progress: 0 },
+    { id: 7, name: "Russian", flag: "🇷🇺", progress: 0 },
+    { id: 8, name: "Hindi", flag: "🇮🇳", progress: 0 },
+    { id: 9, name: "Portuguese", flag: "🇧🇷", progress: 0 },
   ];
 
   const filteredLanguages = languages.filter((lang) =>
@@ -38,9 +37,10 @@ const LanguageDashboard = () => {
   );
 
   const handleLanguageSelect = (language) => {
-    if (selectedLanguages.find((lang) => lang.id === language.id)) {
+    if (selectedLanguages.find((lang) => lang.id === 3)) {
       setSelectedLanguages(
-        selectedLanguages.filter((lang) => lang.id !== language.id)
+        selectedLanguages.filter((lang) => lang.id !== language.id),
+        router.push("/Home/homeScreen")
       );
     } else if (selectedLanguages.length < 4) {
       setSelectedLanguages([...selectedLanguages, language]);
@@ -114,7 +114,6 @@ const LanguageDashboard = () => {
         </View>
       </View>
 
-      {/* Dropdown Menu */}
       {isDropdownVisible && (
         <View style={styles.dropdown}>
           <TouchableOpacity

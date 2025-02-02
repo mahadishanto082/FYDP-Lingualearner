@@ -82,18 +82,22 @@ export default function LoginScreen() {
       >
         <TouchableOpacity
           style={[styles.loginButton, width > 1024 && styles.webButton]}
-          onPress={() => router.push("login/signIn")}
+          onPress={() => router.push("../login/signIn")}
         >
-          <Text style={[styles.loginText, width > 1024 && styles.webButtonText]}>
+          <Text
+            style={[styles.loginText, width > 1024 && styles.webButtonText]}
+          >
             Log In
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.signUpButton, width > 1024 && styles.webButton]}
-          onPress={() => router.push("login/signUp")}
+          onPress={() => router.push("/login/signUp")}
         >
-          <Text style={[styles.signUpText, width > 1024 && styles.webButtonText]}>
+          <Text
+            style={[styles.signUpText, width > 1024 && styles.webButtonText]}
+          >
             Sign Up
           </Text>
         </TouchableOpacity>
