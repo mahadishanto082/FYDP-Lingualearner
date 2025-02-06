@@ -1,25 +1,25 @@
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Tabs } from 'expo-router';
+// import FontAwesome from '@expo/vector-icons/FontAwesome';
+// import { Tabs } from 'expo-router';
 
-export default function TabLayout() {
-  return (
-    <Tabs screenOptions={{ headerShown: false }}>
+// export default function TabLayout() {
+//   return (
+//     <Tabs screenOptions={{ headerShown: false }}>
       
       
-      <Tabs.Screen
-        name="AddNew"
-        options={{
-          title: 'Add new',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="plus" color={color} />,
-        }}
-      />
-      //<Tabs.Screen
-        name="Profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color }) => <FontAwesome size={28} name="user" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
-}
+//       <Tabs.Screen
+//         name="AddNew"
+//         options={{
+//           title: 'Add new',
+//           tabBarIcon: ({ color }) => <FontAwesome size={28} name="plus" color={color} />,
+//         }}
+//       />
+//       //<Tabs.Screen
+//         name="Profile"
+//         options={{
+//           title: 'Profile',
+//           tabBarIcon: ({ color }) => <FontAwesome size={28} name="user" color={color} />,
+//         }}
+//       />
+//     </Tabs>
+//   );
+// }

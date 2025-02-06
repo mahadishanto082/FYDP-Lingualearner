@@ -85,7 +85,7 @@ const HomeScreen: React.FC = () => {
       <View style={styles.topButtons}>
         {/* Profile Button */}
         <TouchableOpacity
-          onPress={() => router.push("./changeProfile")}
+          onPress={() => router.push("./Profile")}
           style={styles.iconButton}
         >
           <Ionicons name="person-circle-outline" size={28} color="black" />
