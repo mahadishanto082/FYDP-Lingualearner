@@ -1,224 +1,255 @@
 import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   View,
   Text,
   StyleSheet,
   Image,
-  Switch,
   ActivityIndicator,
   TouchableOpacity,
+  Alert,
+  ScrollView,
+  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Icon from "react-native-vector-icons/FontAwesome";
 import * as ImagePicker from "expo-image-picker";
-import apiClient from "../../services/api";
-
+import {
+  fetchUserProfile,
+  updateUserProfile,
+  uploadProfilePicture,
+} from "../../services/api";
 const ProfileScreen = () => {
   const navigation = useNavigation();
-  const [darkMode, setDarkMode] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [profile, setProfile] = useState({
     name: "",
-    username: "",
     email: "",
-    phone: "",
+    language: "",
     profileImage: "",
+    level: "",
   });
   const [loading, setLoading] = useState(true);
-
-  const toggleDarkMode = () => setDarkMode(!darkMode);
+  const [editingField, setEditingField] = useState("");
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await apiClient.get("/user/profile");
-        setProfile(response.data);
-      } catch (error) {
-        console.error("Failed to load profile", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchProfile();
   }, []);
+  
+  const fetchProfile = async () => {
+    try {
+      setLoading(true);
+      const userData = await fetchUserProfile();
+      if (userData) setProfile(userData);
+    } catch (error) {
+      Alert.alert("Error", "Failed to load profile. Please try again.");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   const handleImagePick = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
+    try {
+      const token = await AsyncStorage.getItem("userToken"); // Get the auth token
+      if (!token) {
+        Alert.alert("Error", "Not authenticated. Please log in again.");
+        return;
+      }
 
-    if (!result.cancelled) {
-      const { uri } = result;
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
 
-      // Upload image to server or cloud service here
-      const imageUrl = await uploadImageToServer(uri);
-
-      // Save image URL in the database or user profile
-      saveImageUrlToDatabase(imageUrl);
-
-      // Update profile with the selected image
-      setProfile((prev) => ({ ...prev, profileImage: uri }));
+      if (!result.canceled && result.assets.length > 0) {
+        const { uri } = result.assets[0];
+        try {
+          setLoading(true);
+          const imageUrl = await uploadProfilePicture(uri, token); // Pass the token to the upload function
+          setProfile((prev) => ({ ...prev, profileImage: imageUrl }));
+        } catch (error) {
+          Alert.alert(
+            "Upload Failed",
+            "Could not upload image. Please try again."
+          );
+        } finally {
+          setLoading(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error picking image:", error);
+      Alert.alert("Error", "Failed to pick image");
     }
   };
 
-  // Function to upload image to server (replace with your API)
-  const uploadImageToServer = async (uri) => {
-    const formData = new FormData();
-    formData.append("file", {
-      uri,
-      type: "image/jpeg", // Adjust if you're uploading PNG or another image type
-      name: "image.jpg", // You can use the actual file name
-    });
-
-    const response = await fetch("YOUR_SERVER_URL/upload", {
-      method: "POST",
-      body: formData,
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-
-    const data = await response.json();
-    if (data.success) {
-      return data.imageUrl; // Assuming the server returns the URL of the uploaded image
-    }
-
-    throw new Error("Image upload failed");
-  };
-
-  // Save the image URL in your database (replace with actual API call)
-  const saveImageUrlToDatabase = async (imageUrl) => {
-    const response = await fetch("YOUR_SERVER_URL/save-image", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ imageUrl }),
-    });
-
-    const data = await response.json();
-    if (data.success) {
-      console.log("Image URL saved successfully");
-    } else {
-      console.error("Failed to save image URL");
+  const handleUpdateField = async (field, value) => {
+    try {
+      const updatedData = { ...profile, [field]: value };
+      const updatedUser = await updateUserProfile(updatedData);
+      setProfile(updatedUser);
+      setEditingField("");
+    } catch (error) {
+      Alert.alert(
+        "Update Failed",
+        "Could not update profile. Please try again."
+      );
     }
   };
 
-  const handleLanguageChange = () => {
-    setSelectedLanguage((prev) => (prev === "English" ? "Spanish" : "English"));
-  };
+  const DataField = ({ label, field, value }) => (
+    <View style={styles.fieldContainer}>
+      <Text style={styles.fieldLabel}>{label}</Text>
+      {editingField === field ? (
+        <View style={styles.editContainer}>
+          <TextInput
+            style={styles.input}
+            value={value}
+            onChangeText={(text) =>
+              setProfile((prev) => ({ ...prev, [field]: text }))
+            }
+          />
+          <TouchableOpacity
+            style={styles.saveButton}
+            onPress={() => handleUpdateField(field, value)}
+          >
+            <Text style={styles.buttonText}>Save</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.valueContainer}>
+          <Text style={styles.fieldValue}>{value}</Text>
+          <TouchableOpacity onPress={() => setEditingField(field)}>
+            <Icon name="edit" size={20} color="#007bff" />
+          </TouchableOpacity>
+        </View>
+      )}
+    </View>
+  );
 
   return (
-    <View style={styles.container}>
-      {/* Profile Header */}
+    <ScrollView style={styles.container}>
       <View style={styles.header}>
         <Icon
           name="arrow-left"
           size={20}
-          color="white"
+          color="#000"
           onPress={() => navigation.goBack()}
         />
         <Text style={styles.headerTitle}>Profile</Text>
       </View>
 
-      {/* Profile Section */}
-      <View style={styles.profileContainer}>
-        {loading ? (
-          <ActivityIndicator size="large" color="#5A3D8A" />
-        ) : (
-          <>
-            <TouchableOpacity
-              onPress={handleImagePick}
-              style={styles.profileImageFrame}
-            >
-              <Image
-                source={{
-                  uri:
-                    profile.profileImage || "https://via.placeholder.com/100",
-                }}
-                style={styles.profileImage}
-              />
-            </TouchableOpacity>
-            <Text style={styles.name}>{profile.name}</Text>
-            <Text style={styles.username}>{profile.username}</Text>
-            <Text style={styles.email}>{profile.email}</Text>
-            <Text style={styles.phone}>{profile.phone}</Text>
-          </>
-        )}
-      </View>
-
-      {/* Preferences */}
-      <View style={styles.menuSection}>
-        <View style={styles.menuItem}>
-          <Icon name="globe" size={20} style={styles.icon} />
-          <Text style={styles.menuText}>Language: {selectedLanguage}</Text>
+      {loading ? (
+        <ActivityIndicator size="large" color="#5A3D8A" />
+      ) : (
+        <View style={styles.profileContainer}>
           <TouchableOpacity
-            style={styles.changeLangButton}
-            onPress={handleLanguageChange}
+            onPress={handleImagePick}
+            style={styles.profileImageContainer}
           >
-            <Text style={styles.buttonText}>Change</Text>
+            <Image
+              source={{
+                uri: profile.profileImage || "https://via.placeholder.com/100",
+              }}
+              style={styles.profileImage}
+            />
+            <View style={styles.editIconContainer}>
+              <Icon name="camera" size={16} color="#fff" />
+            </View>
           </TouchableOpacity>
-        </View>
-        <View style={styles.menuItem}>
-          <Icon name="moon-o" size={20} style={styles.icon} />
-          <Text style={styles.menuText}>Dark Mode</Text>
-          <Switch
-            value={darkMode}
-            onValueChange={toggleDarkMode}
-            style={styles.switch}
+
+          <DataField label="Name" field="name" value={profile.name} />
+          <DataField label="Email" field="email" value={profile.email} />
+          <DataField
+            label="Language"
+            field="language"
+            value={profile.language}
           />
+          <DataField label="Level" field="level" value={profile.level} />
         </View>
-      </View>
-    </View>
+      )}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff", padding: 20 },
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    backgroundColor: "#5A3D8A",
-    padding: 15,
+    padding: 20,
   },
-  headerTitle: { fontSize: 18, fontWeight: "bold", color: "white" },
-  profileContainer: { alignItems: "center", marginVertical: 20 },
-  profileImageFrame: {
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginLeft: 20,
+  },
+  profileContainer: {
+    padding: 20,
+  },
+  profileImageContainer: {
+    alignSelf: "center",
+    marginBottom: 30,
+    position: "relative",
+  },
+  profileImage: {
     width: 120,
     height: 120,
     borderRadius: 60,
-    borderWidth: 3,
-    borderColor: "#5A3D8A",
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
   },
-  profileImage: { width: 110, height: 110, borderRadius: 55 },
-  name: { fontSize: 18, fontWeight: "bold", marginTop: 10 },
-  username: { fontSize: 16, fontWeight: "bold", marginTop: 5 },
-  email: { fontSize: 16, color: "gray", marginTop: 5 },
-  phone: { fontSize: 16, color: "gray", marginTop: 5 },
-  menuSection: { marginTop: 20 },
-  menuItem: {
+  editIconContainer: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    backgroundColor: "#007bff",
+    padding: 8,
+    borderRadius: 15,
+  },
+  fieldContainer: {
+    marginBottom: 20,
+  },
+  fieldLabel: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 5,
+  },
+  fieldValue: {
+    fontSize: 16,
+    flex: 1,
+  },
+  valueContainer: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 0.5,
-    borderBottomColor: "#ccc",
+    justifyContent: "space-between",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    paddingBottom: 10,
   },
-  icon: { marginRight: 10, color: "#555" },
-  menuText: { flex: 1, fontSize: 16 },
-  switch: { marginLeft: "auto" },
-  changeLangButton: {
-    backgroundColor: "#5A3D8A",
-    padding: 5,
+  editContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 5,
+    padding: 8,
+    marginRight: 10,
+  },
+  saveButton: {
+    backgroundColor: "#007bff",
+    padding: 8,
     borderRadius: 5,
   },
-  buttonText: { color: "white", fontSize: 14 },
+  buttonText: {
+    color: "#fff",
+  },
 });
 
 export default ProfileScreen;

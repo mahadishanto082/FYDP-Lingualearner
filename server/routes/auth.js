@@ -50,7 +50,7 @@ router.post("/register", validateRegistration, async (req, res) => {
 });
 
 // ✅ Login a user
-router.post("/auth/login", async (req, res) => {
+router.post("/", async (req, res) => {
   const { email, password } = req.body;
 
   try {
