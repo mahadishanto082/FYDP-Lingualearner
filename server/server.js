@@ -27,7 +27,7 @@ app.use(
 connectDB();
 
 // Routes
-app.use("/auth", authRoutes);
+app.use("/", authRoutes);
 app.use("/posts", postRoutes);
 app.use("/comments", commentRoutes);
 
