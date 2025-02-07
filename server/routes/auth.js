@@ -50,7 +50,9 @@ router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: "Both email and password are required" });
+    return res
+      .status(400)
+      .json({ message: "Both email and password are required" });
   }
 
   try {
@@ -69,7 +71,9 @@ router.post("/login", async (req, res) => {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
 
     // Respond with success and the token
     res.json({ message: "Login successful", token });

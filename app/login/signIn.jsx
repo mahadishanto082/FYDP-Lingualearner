@@ -32,18 +32,29 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await apiClient.post(
-        "/login",
-        ({ email: formData.email, password: formData.password } = req.body)
-      );
+      const response = await fetch("http://localhost:5000/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
 
-      await AsyncStorage.setItem("token", response.data.token);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Invalid credentials.");
+      }
+
+      console.log("Login Successful:", data);
+      await AsyncStorage.setItem("token", data.token);
       router.replace("../(tabs)/index1");
     } catch (error) {
-      console.log(error.response?.data);
-      const errorMessage =
-        error.response?.data?.error || "Invalid credentials. Please try again.";
-      setMessage(errorMessage);
+      console.log("Login Error:", error.message);
+      setMessage(error.message);
     } finally {
       setLoading(false);
     }
