@@ -2,7 +2,7 @@ import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // Change this to your actual backend URL
-const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:5000/api"; 
 
 // ✅ Fetch user profile
 export const fetchUserProfile = async () => {
@@ -22,10 +22,7 @@ export const fetchUserProfile = async () => {
 
     return response.data;
   } catch (error) {
-    console.error(
-      "Error fetching user profile:",
-      error.response?.data || error.message
-    );
+    console.error("Error fetching user profile:", error.response?.data || error.message);
     throw error;
   }
 };
@@ -51,10 +48,7 @@ export const updateUserProfile = async (updatedData) => {
 
     return response.data;
   } catch (error) {
-    console.error(
-      "Error updating profile:",
-      error.response?.data || error.message
-    );
+    console.error("Error updating profile:", error.response?.data || error.message);
     throw error;
   }
 };

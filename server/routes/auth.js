@@ -9,11 +9,16 @@ const router = express.Router();
 // ✅ Validation rules for user registration
 const validateRegistration = [
   body("name").notEmpty().withMessage("Name is required"),
-  body("email").isEmail().normalizeEmail().withMessage("Valid email is required"),
-  body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
+  body("email")
+    .isEmail()
+    .normalizeEmail()
+    .withMessage("Valid email is required"),
+  body("password")
+    .isLength({ min: 6 })
+    .withMessage("Password must be at least 6 characters"),
 ];
 
-// ✅ Register a new user
+/// ✅ Register a new user (No hashing)
 router.post("/register", validateRegistration, async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -29,14 +34,8 @@ router.post("/register", validateRegistration, async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // ✅ Hash the password before saving
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    console.log("Generated Hashed Password:", hashedPassword); // Debugging
-
-    // Create new user with hashed password
-    const newUser = new User({ name, email, password: hashedPassword });
+    // Create new user with plain text password
+    const newUser = new User({ name, email, password }); // No hashing
     await newUser.save();
 
     res.status(201).json({ message: "User registered successfully" });
@@ -46,11 +45,10 @@ router.post("/register", validateRegistration, async (req, res) => {
   }
 });
 
-// ✅ Login a user
-router.post("/login", async (req, res) => {  // ✅ Fixed the incorrect route
+/// ✅ Login a user with hashed passwords
+router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
-  // ✅ Check if email and password are provided
   if (!email || !password) {
     return res.status(400).json({ message: "Both email and password are required" });
   }
@@ -63,25 +61,18 @@ router.post("/login", async (req, res) => {  // ✅ Fixed the incorrect route
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    if (!user.password) {
-      console.error("User exists but has no password:", user);
-      return res.status(500).json({ message: "Password missing in database" });
-    }
-
-    console.log("Stored Hashed Password:", user.password);
-    console.log("Entered Password:", password);
-
-    // ✅ Compare hashed password
+    // Compare entered password with stored (hashed) password
     const isMatch = await bcrypt.compare(password, user.password);
-    
+
     if (!isMatch) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // ✅ Generate JWT Token
+    // Generate JWT token
     const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    res.json({ token });
+    // Respond with success and the token
+    res.json({ message: "Login successful", token });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ message: "Server error" });
