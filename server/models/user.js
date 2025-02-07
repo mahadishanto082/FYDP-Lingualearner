@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
       lowercase: true,
       trim: true,
       unique: true, // Ensure unique emails
+      match: [/^\S+@\S+\.\S+$/, "Invalid email format"], // ✅ Email validation
     },
     password: {
       type: String,
@@ -25,29 +26,37 @@ const userSchema = new mongoose.Schema(
     bio: { type: String, trim: true },
     image: { type: String },
     socialLinks: {
-      facebook: String,
-      twitter: String,
-      instagram: String,
-      linkedin: String,
+      facebook: { type: String, trim: true },
+      twitter: { type: String, trim: true },
+      instagram: { type: String, trim: true },
+      linkedin: { type: String, trim: true },
     },
   },
   { timestamps: true }
 );
 
-// Hash password before saving
+// ✅ Hash password before saving (only if modified)
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-  const salt = await bcrypt.genSalt(10);
-  this.password = await bcrypt.hash(this.password, salt);
-  next();
+  try {
+    const salt = await bcrypt.genSalt(10);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
-// Compare password method
+// ✅ Compare password method
 userSchema.methods.comparePassword = async function (candidatePassword) {
-  return await bcrypt.compare(candidatePassword, this.password);
+  try {
+    return await bcrypt.compare(candidatePassword, this.password);
+  } catch (error) {
+    throw new Error("Password comparison failed");
+  }
 };
 
-// Fix OverwriteModelError by using `mongoose.models.User` if it exists
+// ✅ Fix OverwriteModelError
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
 export default User;

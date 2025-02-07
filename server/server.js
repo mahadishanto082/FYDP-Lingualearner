@@ -11,23 +11,26 @@ import commentRoutes from "./routes/comments.js";
 
 dotenv.config();
 const app = express();
-app.use(express.json());
+app.use(express.json()); // ✅ Ensure JSON parsing is enabled before routes
+
 app.use(helmet());
 app.use(morgan("dev"));
 app.use(
   cors({
-    origin: "http://localhost:8081",
+    origin: "http://localhost:5000",
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
   })
 );
+app.use(cors()); // ✅ Allows all origins (for debugging)
+
 
 // Connect to DB
 connectDB();
 
 // Routes
-app.use("/auth", authRoutes);
+app.use("/", authRoutes);
 app.use("/posts", postRoutes);
 app.use("/comments", commentRoutes);
 

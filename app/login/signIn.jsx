@@ -32,13 +32,15 @@ const LoginPage = () => {
     }
 
     try {
-      const response = await apiClient.post("/login", {
-        email: formData.email,
-        password: formData.password,
-      });
+      const response = await apiClient.post(
+        "/login",
+        ({ email: formData.email, password: formData.password } = req.body)
+      );
+
       await AsyncStorage.setItem("token", response.data.token);
       router.replace("../(tabs)/index1");
     } catch (error) {
+      console.log(error.response?.data);
       const errorMessage =
         error.response?.data?.error || "Invalid credentials. Please try again.";
       setMessage(errorMessage);
