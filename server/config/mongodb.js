@@ -1,18 +1,44 @@
-import mongoose from 'mongoose';
-import dotenv from 'dotenv';
+import mongoose from "mongoose";
+import { GridFSBucket } from "mongodb";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-const mongoURI = process.env.MONGO_URI || 'mongodb://localhost:27017/yourdb';  // Fallback to localhost
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
+let gfs;
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(mongoURI, { 
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log("MongoDB Connected Successfully");
+
+    // Initialize GridFS bucket
+    gfs = new GridFSBucket(conn.connection.db, {
+      bucketName: "uploads"
     });
-    console.log('MongoDB connected successfully');
-  } catch (err) {
-    console.error('MongoDB connection error:', err);
+
+    mongoose.connection.on('error', err => {
+      console.error('MongoDB connection error:', err);
+    });
+
+    mongoose.connection.on('disconnected', () => {
+      console.log('MongoDB disconnected. Attempting to reconnect...');
+    });
+
+    mongoose.connection.on('reconnected', () => {
+      console.log('MongoDB reconnected');
+    });
+
+    return { connection: conn, gfs };
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    process.exit(1);
   }
 };
 
-export default connectDB;
+export { connectDB, gfs };

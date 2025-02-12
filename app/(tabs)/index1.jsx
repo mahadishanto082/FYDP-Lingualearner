@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,9 +8,12 @@ import {
   ScrollView,
   StyleSheet,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { getUserProfile } from "../services/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LanguageDashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -19,17 +22,43 @@ const LanguageDashboard = () => {
   const [selectedLanguages, setSelectedLanguages] = useState([]);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadUserProfile();
+  }, []);
+
+  const loadUserProfile = async () => {
+    try {
+      const profile = await getUserProfile();
+      setUserProfile(profile);
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('userToken');
+      router.replace('/login/signIn');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
 
   const languages = [
-    { id: 1, name: "Japanese", flag: "🇯🇵", progress: 0 },
-    { id: 2, name: "German", flag: "🇩🇪", progress: 0 },
-    { id: 3, name: "Spanish", flag: "🇪🇸", progress: 0 },
-    { id: 4, name: "Arabic", flag: "🇸🇪", progress: 0 },
-    { id: 5, name: "Bangla", flag: "🇧🇩", progress: 0 },
-    { id: 6, name: "Mandarin", flag: "🇨🇳", progress: 0 },
-    { id: 7, name: "Russian", flag: "🇷🇺", progress: 0 },
-    { id: 8, name: "Hindi", flag: "🇮🇳", progress: 0 },
-    { id: 9, name: "Portuguese", flag: "🇧🇷", progress: 0 },
+    { id: 1, name: "Japanese", flag: "", progress: 0 },
+    { id: 2, name: "German", flag: "", progress: 0 },
+    { id: 3, name: "Spanish", flag: "", progress: 0 },
+    { id: 4, name: "Arabic", flag: "", progress: 0 },
+    { id: 5, name: "Bangla", flag: "", progress: 0 },
+    { id: 6, name: "Mandarin", flag: "", progress: 0 },
+    { id: 7, name: "Russian", flag: "", progress: 0 },
+    { id: 8, name: "Hindi", flag: "", progress: 0 },
+    { id: 9, name: "Portuguese", flag: "", progress: 0 },
   ];
 
   const filteredLanguages = languages.filter((lang) =>
@@ -106,10 +135,18 @@ const LanguageDashboard = () => {
             style={styles.profileButton}
             onPress={handleProfileClick}
           >
-            <Image
-              source={{ uri: "https://via.placeholder.com/40" }}
-              style={styles.profileImage}
-            />
+            {loading ? (
+              <ActivityIndicator size="small" color="#007AFF" />
+            ) : (
+              <Image
+                source={
+                  userProfile?.image
+                    ? { uri: userProfile.image }
+                    : { uri: 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y' }
+                }
+                style={styles.profileImage}
+              />
+            )}
           </TouchableOpacity>
         </View>
       </View>
@@ -118,14 +155,20 @@ const LanguageDashboard = () => {
         <View style={styles.dropdown}>
           <TouchableOpacity
             style={styles.dropdownItem}
-            onPress={() => router.push("Profile.jsx")}
+            onPress={() => router.push("/profile")}
           >
+            <MaterialIcons name="person" size={20} color="#666" />
             <Text style={styles.dropdownText}>View Profile</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.dropdownItem}>
+            <MaterialIcons name="settings" size={20} color="#666" />
             <Text style={styles.dropdownText}>Settings</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.dropdownItem}>
+          <TouchableOpacity 
+            style={styles.dropdownItem}
+            onPress={handleLogout}
+          >
+            <MaterialIcons name="logout" size={20} color="#666" />
             <Text style={styles.dropdownText}>Logout</Text>
           </TouchableOpacity>
         </View>
@@ -210,11 +253,10 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   profileImage: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-    borderColor: "#007AFF",
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
   },
   searchContainer: {
     flexDirection: "row",
@@ -347,26 +389,30 @@ const styles = StyleSheet.create({
     borderTopColor: "#333",
   },
   dropdown: {
-    position: "absolute",
-    top: 70,
-    right: 16,
-    backgroundColor: "#fff",
+    position: 'absolute',
+    top: 80,
+    right: 20,
+    backgroundColor: '#fff',
     borderRadius: 8,
-    paddingVertical: 8,
-    shadowColor: "#000",
+    padding: 8,
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
     elevation: 5,
     zIndex: 1000,
   },
   dropdownItem: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
   },
   dropdownText: {
+    marginLeft: 8,
     fontSize: 16,
-    color: "#333",
+    color: '#333',
   },
 });
 
