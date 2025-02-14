@@ -51,7 +51,7 @@ const LoginPage = () => {
 
       console.log("Login Successful:", data);
       await AsyncStorage.setItem("token", data.token);
-      router.replace("../(tabs)/index1");
+      router.replace("/Home/homeScreen");
     } catch (error) {
       console.log("Login Error:", error.message);
       setMessage(error.message);

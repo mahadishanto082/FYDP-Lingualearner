@@ -31,23 +31,29 @@ const ProfileScreen = () => {
   const [loading, setLoading] = useState(true);
   const [editingField, setEditingField] = useState("");
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  const [userData, setUserData] = useState("");
   
   const fetchProfile = async () => {
     try {
       setLoading(true);
       const userData = await fetchUserProfile();
-      if (userData) setProfile(userData);
+
+      console.log("Fetched User Data:", userData); // Debug the API response
+
+      if (userData) {
+        setProfile(userData); // This should update the state
+      }
     } catch (error) {
+      console.error("Error fetching profile:", error);
       Alert.alert("Error", "Failed to load profile. Please try again.");
-      console.error(error);
     } finally {
       setLoading(false);
     }
   };
-  
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
 
   const handleImagePick = async () => {
     try {
@@ -160,14 +166,26 @@ const ProfileScreen = () => {
             </View>
           </TouchableOpacity>
 
-          <DataField label="Name" field="name" value={profile.name} />
-          <DataField label="Email" field="email" value={profile.email} />
+          <DataField
+            label="Name"
+            field="name"
+            value={profile.name ? profile.name : "N/A"}
+          />
+          <DataField
+            label="Email"
+            field="email"
+            value={profile.email = userData.email}
+          />
           <DataField
             label="Language"
             field="language"
-            value={profile.language}
+            value={profile.language ? profile.language : "N/A"}
           />
-          <DataField label="Level" field="level" value={profile.level} />
+          <DataField
+            label="Level"
+            field="level"
+            value={profile.level ? profile.level : ""}
+          />
         </View>
       )}
     </ScrollView>

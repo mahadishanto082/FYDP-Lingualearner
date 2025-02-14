@@ -57,15 +57,21 @@ const SignupPage = () => {
     }
 
     try {
-      await apiClient.post("/register", {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        confirmPassword: formData.confirmPassword,
-        phone: formData.phone,
+      const response = await fetch("http://localhost:5000/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          confirmPassword: formData.confirmPassword,
+          phone: formData.phone,
+        }),
       });
       setMessage("User registered successfully! Please login.");
-      router.push("login/signIn");
+      router.push("../(tabs)/index1");
     } catch (error) {
       const errorMessage =
         error.response?.data?.error || "An error occurred. Please try again.";
