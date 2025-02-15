@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
+import ConfettiCannon from "react-native-confetti-cannon"; // 🎉 Confetti Celebration
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
@@ -26,11 +27,6 @@ const quizzes = [
     options: ["goed", "went", "gone", "going"],
   },
   {
-    question: "What is the largest planet in our Solar System?",
-    correctAnswer: "Jupiter",
-    options: ["Mars", "Venus", "Jupiter", "Saturn"],
-  },
-  {
     question: "What is 2 + 2?",
     correctAnswer: "4",
     options: ["3", "4", "5", "6"],
@@ -45,11 +41,6 @@ const quizzes = [
       "Mark Twain",
     ],
   },
-  {
-    question: "Translate 'Serendipity' to French.",
-    correctAnswer: "Sérendipité",
-    options: ["Sérendipité", "Bonheur", "Chance", "Destin"],
-  },
 ];
 
 const Quizzes = () => {
@@ -57,6 +48,7 @@ const Quizzes = () => {
   const [selected, setSelected] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
+  const [quizFinished, setQuizFinished] = useState(false);
   const [fadeAnim] = useState(new Animated.Value(0));
   const router = useRouter();
 
@@ -94,16 +86,37 @@ const Quizzes = () => {
         if (current + 1 < quizzes.length) {
           setCurrent((prev) => prev + 1);
         } else {
-          router.push("/(tabs)/Home/homeScreen"); // ✅ Navigates after the last question
+          setQuizFinished(true);
         }
       }, 1000);
     });
   };
 
+  const restartQuiz = () => {
+    setCurrent(0);
+    setScore(0);
+    setSelected(null);
+    setIsCorrect(null);
+    setQuizFinished(false);
+  };
+
   return (
     <View style={styles.wrapper}>
       <View style={styles.quizContainer}>
-        {current < quizzes.length ? (
+        {quizFinished ? (
+          <View style={styles.scoreContainer}>
+            {score === quizzes.length && (
+              <ConfettiCannon count={200} origin={{ x: 200, y: 0 }} />
+            )}
+            <Text style={styles.scoreText}>
+              {score === quizzes.length ? "🎉 Perfect Score! 🥳" : `🎯 Your Score: ${score} / ${quizzes.length}`}
+            </Text>
+
+            <TouchableOpacity style={styles.restartButton} onPress={restartQuiz}>
+              <Text style={styles.restartText}>Restart Quiz</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
           <>
             <Animated.View style={{ opacity: fadeAnim }}>
               <Text style={styles.question}>{quizzes[current].question}</Text>
@@ -130,14 +143,10 @@ const Quizzes = () => {
               </Text>
             )}
           </>
-        ) : (
-          <Text style={styles.score}>
-            Your Score: {score} / {quizzes.length}
-          </Text>
         )}
       </View>
 
-      {/* Bottom Navigation Bar */}
+      {/* ✅ Bottom Navigation Bar (Fixed) */}
       <View style={styles.navBar}>
         <TouchableOpacity
           style={styles.navButton}
@@ -211,26 +220,38 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontWeight: "bold",
   },
-  score: {
-    fontSize: 20,
-    fontWeight: "bold",
-    textAlign: "center",
+  scoreContainer: {
+    alignItems: "center",
+    justifyContent: "center",
     marginTop: 50,
   },
-
-  /* Bottom Navigation Bar */
+  scoreText: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 20,
+  },
+  restartButton: {
+    backgroundColor: "#007AFF",
+    padding: 12,
+    borderRadius: 8,
+  },
+  restartText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
   navBar: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
+    backgroundColor: "#007AFF",
     flexDirection: "row",
     justifyContent: "space-around",
-    backgroundColor: "#007AFF",
     paddingVertical: 12,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    elevation: 10,
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
   },
   navButton: {
     alignItems: "center",
@@ -238,8 +259,8 @@ const styles = StyleSheet.create({
   },
   navText: {
     color: "white",
-    fontSize: 14,
-    marginTop: 4,
+    fontSize: 12,
+    marginTop: 3,
   },
 });
 
