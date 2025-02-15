@@ -7,11 +7,13 @@ import {
   StyleSheet,
   Dimensions,
   Alert,
+  Image,
 } from "react-native";
 import { useRouter } from "expo-router";
 import * as Animatable from "react-native-animatable";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import apiClient from "../services/api";
+import * as ImagePicker from 'expo-image-picker';
+import { registerUser } from "../services/api";
 
 const { width } = Dimensions.get("window");
 const isLargeScreen = width > 768;
@@ -23,40 +25,91 @@ const SignupPage = () => {
     password: "",
     confirmPassword: "",
     name: "",
-    phone: "",
+    profileImage: null,
   });
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+
+  // Add AsyncStorage error checking
+  const checkAsyncStorage = async () => {
+    try {
+      // Try to write and read a test value
+      await AsyncStorage.setItem('@storage_test', 'test_value');
+      const testValue = await AsyncStorage.getItem('@storage_test');
+      
+      if (testValue !== 'test_value') {
+        setMessage('AsyncStorage is not working properly');
+        return false;
+      }
+      
+      // Clean up test value
+      await AsyncStorage.removeItem('@storage_test');
+      return true;
+    } catch (error) {
+      console.error('AsyncStorage Error:', error);
+      setMessage('Error accessing device storage: ' + error.message);
+      return false;
+    }
+  };
+
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 0.8,
+        allowsMultipleSelection: false,
+      });
+
+      console.log('Image picker result:', result);
+
+      if (!result.canceled) {
+        const selectedImage = result.assets[0];
+        console.log('Selected image:', selectedImage);
+
+        // Check file size
+        const response = await fetch(selectedImage.uri);
+        const blob = await response.blob();
+        const fileSize = blob.size;
+        
+        if (fileSize > 5 * 1024 * 1024) { // 5MB limit
+          setMessage('Image size must be less than 5MB');
+          return;
+        }
+
+        // Get file extension from URI
+        const extension = selectedImage.uri.split('.').pop();
+        
+        setFormData(prev => ({
+          ...prev,
+          profileImage: {
+            uri: selectedImage.uri,
+            type: `image/${extension}`,
+            name: `profile-image.${extension}`,
+          }
+        }));
+        
+        console.log('Updated form data with image:', {
+          uri: selectedImage.uri,
+          type: `image/${extension}`,
+          name: `profile-image.${extension}`,
+        });
+
+        setMessage(''); // Clear any previous error messages
+      }
+    } catch (error) {
+      console.error('Error picking image:', error);
+      setMessage('Error selecting image. Please try again.');
+    }
+  };
 
   const handleSignup = async () => {
     setLoading(true);
     setMessage("");
 
-    if (
-      !formData.email ||
-      !formData.password ||
-      !formData.confirmPassword ||
-      !formData.name ||
-      !formData.phone
-    ) {
-      setMessage("All fields are required.");
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setMessage("Password must be at least 6 characters.");
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setMessage("Passwords do not match.");
-      setLoading(false);
-      return;
-    }
-
     try {
+<<<<<<< HEAD
       const response = await fetch("http://localhost:5000/register", {
         method: "POST",
         headers: {
@@ -72,9 +125,61 @@ const SignupPage = () => {
       });
       setMessage("User registered successfully! Please login.");
       router.push("../(tabs)/index1");
+=======
+      console.log('Starting signup with form data:', formData);
+
+      if (
+        !formData.email ||
+        !formData.password ||
+        !formData.confirmPassword ||
+        !formData.name
+      ) {
+        setMessage("All fields are required except profile image.");
+        setLoading(false);
+        return;
+      }
+
+      if (formData.password.length < 6) {
+        setMessage("Password must be at least 6 characters.");
+        setLoading(false);
+        return;
+      }
+
+      if (formData.password !== formData.confirmPassword) {
+        setMessage("Passwords do not match.");
+        setLoading(false);
+        return;
+      }
+
+      // Try to store user email temporarily
+      try {
+        await AsyncStorage.setItem('@last_signup_email', formData.email);
+      } catch (storageError) {
+        console.error('Failed to store email in AsyncStorage:', storageError);
+        // Continue with signup despite AsyncStorage error
+      }
+
+      const response = await registerUser(formData);
+      console.log('Registration successful:', response);
+      
+      setMessage("Registration successful!");
+      
+      // Navigate to dashboard after successful registration
+      setTimeout(() => {
+        router.replace("/(tabs)");
+      }, 1000);
+
+      // Clear stored email on successful signup
+      try {
+        await AsyncStorage.removeItem('@last_signup_email');
+      } catch (storageError) {
+        console.error('Failed to clear email from AsyncStorage:', storageError);
+      }
+>>>>>>> 5fe4bdb506750dc4349dd5e9e48a26e1e53d3da6
     } catch (error) {
+      console.error('Signup error:', error);
       const errorMessage =
-        error.response?.data?.error || "An error occurred. Please try again.";
+        error.response?.data?.message || "An error occurred. Please try again.";
       setMessage(errorMessage);
     } finally {
       setLoading(false);
@@ -119,14 +224,6 @@ const SignupPage = () => {
           />
           <TextInput
             style={styles.input}
-            placeholder="Phone"
-            placeholderTextColor="#BDBDBD"
-            keyboardType="phone-pad"
-            value={formData.phone}
-            onChangeText={(text) => setFormData({ ...formData, phone: text })}
-          />
-          <TextInput
-            style={styles.input}
             placeholder="Email"
             placeholderTextColor="#BDBDBD"
             keyboardType="email-address"
@@ -153,6 +250,16 @@ const SignupPage = () => {
               setFormData({ ...formData, confirmPassword: text })
             }
           />
+            <TouchableOpacity style={styles.imageUploadButton} onPress={pickImage}>
+            {formData.profileImage ? (
+              <Image
+                source={{ uri: formData.profileImage.uri }}
+                style={styles.previewImage}
+              />
+            ) : (
+              <Text style={styles.imageUploadText}>Upload Profile Picture</Text>
+            )}
+          </TouchableOpacity>
         </Animatable.View>
 
         {message ? <Text style={styles.message}>{message}</Text> : null}
@@ -257,6 +364,26 @@ const styles = StyleSheet.create({
     color: "#6E44A9",
     fontWeight: "bold",
     fontSize: 14,
+  },
+  imageUploadButton: {
+    width: "100%",
+    height: 50,
+    borderWidth: 1,
+    borderColor: "#BDBDBD",
+    borderRadius: 10,
+    marginVertical: 10,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#F8F8F8",
+  },
+  imageUploadText: {
+    color: "#BDBDBD",
+    fontSize: 16,
+  },
+  previewImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 10,
   },
 });
 
