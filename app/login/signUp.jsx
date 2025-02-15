@@ -109,7 +109,6 @@ const SignupPage = () => {
     setMessage("");
 
     try {
-<<<<<<< HEAD
       const response = await fetch("http://localhost:5000/register", {
         method: "POST",
         headers: {
@@ -125,57 +124,6 @@ const SignupPage = () => {
       });
       setMessage("User registered successfully! Please login.");
       router.push("../(tabs)/index1");
-=======
-      console.log('Starting signup with form data:', formData);
-
-      if (
-        !formData.email ||
-        !formData.password ||
-        !formData.confirmPassword ||
-        !formData.name
-      ) {
-        setMessage("All fields are required except profile image.");
-        setLoading(false);
-        return;
-      }
-
-      if (formData.password.length < 6) {
-        setMessage("Password must be at least 6 characters.");
-        setLoading(false);
-        return;
-      }
-
-      if (formData.password !== formData.confirmPassword) {
-        setMessage("Passwords do not match.");
-        setLoading(false);
-        return;
-      }
-
-      // Try to store user email temporarily
-      try {
-        await AsyncStorage.setItem('@last_signup_email', formData.email);
-      } catch (storageError) {
-        console.error('Failed to store email in AsyncStorage:', storageError);
-        // Continue with signup despite AsyncStorage error
-      }
-
-      const response = await registerUser(formData);
-      console.log('Registration successful:', response);
-      
-      setMessage("Registration successful!");
-      
-      // Navigate to dashboard after successful registration
-      setTimeout(() => {
-        router.replace("/(tabs)");
-      }, 1000);
-
-      // Clear stored email on successful signup
-      try {
-        await AsyncStorage.removeItem('@last_signup_email');
-      } catch (storageError) {
-        console.error('Failed to clear email from AsyncStorage:', storageError);
-      }
->>>>>>> 5fe4bdb506750dc4349dd5e9e48a26e1e53d3da6
     } catch (error) {
       console.error('Signup error:', error);
       const errorMessage =

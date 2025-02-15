@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
 import { body, validationResult } from "express-validator";
-import { upload } from '../config/gridfs.js';
+// import { upload } from '../config/gridfs.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();
@@ -29,7 +29,7 @@ const validateRegistration = [
 ];
 
 // Register a new user
-router.post("/register", upload.single('profileImage'), validateRegistration, async (req, res) => {
+router.post("/register",  validateRegistration, async (req, res) => {
   try {
     console.log('Received registration request');
     console.log('Request body:', req.body);

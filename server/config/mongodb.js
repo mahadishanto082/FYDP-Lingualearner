@@ -18,7 +18,7 @@ const connectDB = async () => {
     console.log("MongoDB Connected Successfully");
 
     // Initialize GridFS bucket
-    gfs = new GridFSBucket(conn.connection.db, {
+    const gfs = new GridFSBucket(conn.connection.db, {
       bucketName: "uploads"
     });
 
@@ -41,4 +41,4 @@ const connectDB = async () => {
   }
 };
 
-export { connectDB, gfs };
+export default connectDB;  // ✅ Now exported as default

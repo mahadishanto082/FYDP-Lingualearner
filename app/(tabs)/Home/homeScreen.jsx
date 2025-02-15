@@ -21,26 +21,26 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const buttons = [
   {
-    label: "Get Started",
-    icon: "play-circle",
-    path: "./getStarted",
+    label: "Dictionary",
+    icon: "book",
+    path: "./dictionary",
     colors: ["#9b6df7", "#6c3dd6"],
   },
   {
     label: "Read Blogs",
-    icon: "book",
+    icon: "document-text-outline",
     path: "../blog/blogDetails",
     colors: ["#ff45a9", "#d81b60"],
   },
   {
     label: "Write Blog",
     icon: "pencil",
-    path: "../blog/createBlog",
+    path: "/(tabs)/blog/createBlog",
     colors: ["#26de81", "#20bf6b"],
   },
   {
     label: "Quizzes",
-    icon: "help-circle",
+    icon: "clipboard-outline",
     path: "./quizzes",
     colors: ["#00d2ff", "#00b3e6"],
   },
@@ -70,7 +70,10 @@ const HomeScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.topButtons}>
-        <Image source={require('../../../assets/images/logo.png')} style={styles.logo} />
+        <Image
+          source={require("../../../assets/images/logo.png")}
+          style={styles.logo}
+        />
         <View style={styles.rightButtons}>
           <IconButton
             onPress={() => router.push("./Profile")}
@@ -91,7 +94,9 @@ const HomeScreen = () => {
         ))}
       </View>
 
-      <Text style={styles.footerText}>© 2025 Lingua Learner. All rights reserved.</Text>
+      <Text style={styles.footerText}>
+        © 2025 Lingua Learner. All rights reserved.
+      </Text>
     </ScrollView>
   );
 };
@@ -103,7 +108,9 @@ const IconButton = ({ onPress, icon }) => (
 );
 
 const AnimatedButton = ({ button, buttonAnim, onPress }) => (
-  <Animated.View style={{ opacity: buttonAnim, marginVertical: 8, width: '100%' }}>
+  <Animated.View
+    style={{ opacity: buttonAnim, marginVertical: 8, width: "100%" }}
+  >
     <TouchableOpacity onPress={onPress}>
       <LinearGradient
         colors={button.colors}
@@ -113,7 +120,12 @@ const AnimatedButton = ({ button, buttonAnim, onPress }) => (
       >
         <View style={styles.buttonContent}>
           <Text style={styles.buttonText}>{button.label}</Text>
-          <Ionicons name={button.icon} size={24} color="white" style={styles.buttonIcon} />
+          <Ionicons
+            name={button.icon}
+            size={24}
+            color="white"
+            style={styles.buttonIcon}
+          />
         </View>
       </LinearGradient>
     </TouchableOpacity>
@@ -124,12 +136,12 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 16,
-    backgroundColor: "#f0f4f7"
+    backgroundColor: "#f0f4f7",
   },
   centerContainer: {
     flex: 1,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   topButtons: {
     flexDirection: "row",
@@ -140,7 +152,7 @@ const styles = StyleSheet.create({
   logo: {
     width: 50,
     height: 50,
-    resizeMode: 'contain',
+    resizeMode: "contain",
   },
   rightButtons: {
     flexDirection: "row",
@@ -167,7 +179,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    height: '100%',
+    height: "100%",
   },
   buttonText: {
     color: "white",
@@ -181,7 +193,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 20,
     color: "#888",
-  }
+  },
 });
 
 export default HomeScreen;

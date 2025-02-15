@@ -59,13 +59,12 @@
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = "http://localhost:5000"; // Use this for Android Emulator
-// const API_URL = "http://192.168.X.X:5000"; // Use this for real devices
+// Use local network IP instead of "localhost" (update with actual IP)
+const API_URL = "http://192.168.X.X:5000"; // Replace X.X with your actual IP
 
-// ✅ Fetch user profile
+// Fetch user profile
 export const fetchUserProfile = async () => {
   try {
-<<<<<<< HEAD
     const token = await AsyncStorage.getItem("userToken");
     if (!token) {
       console.error("No authentication token found");
@@ -99,11 +98,11 @@ export const fetchUserProfile = async () => {
     return responseData;
   } catch (error) {
     console.error("fetchUserProfile Error:", error);
-    return null;
+    return null; // Return null if an error occurs
   }
 };
 
-// ✅ Update user profile
+// Update user profile
 export const updateUserProfile = async (updatedData) => {
   try {
     const token = await AsyncStorage.getItem("userToken");
@@ -114,19 +113,8 @@ export const updateUserProfile = async (updatedData) => {
 
     console.log("Updating Profile with:", updatedData); // Debugging
 
-<<<<<<< HEAD
     const response = await fetch(`${API_URL}/user/profile`, {
       method: "PUT",
-=======
-    if (!token) {
-      console.error("User not authenticated (No Token Found)");
-      throw new Error("User not authenticated");
-    }
-
-    console.log("User Token:", token); // Debugging
-
-    const response = await apiClient.put('/user/profile', updatedData, {
->>>>>>> 5fe4bdb506750dc4349dd5e9e48a26e1e53d3da6
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -150,4 +138,3 @@ export const updateUserProfile = async (updatedData) => {
     throw error;
   }
 };
-
