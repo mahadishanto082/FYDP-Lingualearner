@@ -7,13 +7,12 @@ import {
   TextInput,
   StyleSheet,
   Animated as RNAnimated,
-  Animated,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Animated from "react-native-reanimated";
 
 interface Post {
   id: number;
@@ -29,8 +28,6 @@ const HomeScreen: React.FC = () => {
   const [editingPost, setEditingPost] = useState<Post | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedContent, setEditedContent] = useState("");
-  const navigation = useNavigation();
-
   const fadeAnim = useState(new RNAnimated.Value(0))[0];
   const button1Anim = useState(new RNAnimated.Value(0))[0];
   const button2Anim = useState(new RNAnimated.Value(0))[0];
@@ -53,53 +50,28 @@ const HomeScreen: React.FC = () => {
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem("authToken");
-      router.replace("/login/signIn"); // Redirect to login screen after logout
+      router.replace("/login/signIn");
     } catch (error) {
       console.error("Logout failed:", error);
     }
-  };
-
-  const handleEdit = (post: Post) => {
-    setEditingPost(post);
-    setEditedTitle(post.title);
-    setEditedContent(post.content);
-    setEditModalVisible(true);
-    RNAnimated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const closeModal = () => {
-    RNAnimated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => setEditModalVisible(false));
   };
 
   return (
     <View style={styles.container}>
       {/* Top Right Buttons */}
       <View style={styles.topButtons}>
-        {/* Profile Button */}
         <TouchableOpacity
           onPress={() => router.push("./Profile")}
           style={styles.iconButton}
         >
           <Ionicons name="person-circle-outline" size={28} color="black" />
         </TouchableOpacity>
-
-        {/* Logout Button */}
         <TouchableOpacity onPress={handleLogout} style={styles.iconButton}>
           <Ionicons name="log-out-outline" size={28} color="black" />
         </TouchableOpacity>
       </View>
 
       {/* Animated Buttons */}
-
-      {/* Centered Content */}
       <View style={styles.centerContainer}>
         <Animated.View style={{ opacity: button1Anim }}>
           <LinearGradient
@@ -153,10 +125,26 @@ const HomeScreen: React.FC = () => {
           >
             <TouchableOpacity
               style={styles.buttonContent}
-              onPress={() => router.push("./quizzes")}
+              onPress={() => router.push("/(tabs)/Home/quizzes")}
             >
               <Ionicons name="help-circle" size={50} color="white" />
               <Text style={styles.buttonText}>Quizzes</Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </Animated.View>
+
+        {/* New Dictionary Button */}
+        <Animated.View style={{ opacity: button2Anim }}>
+          <LinearGradient
+            colors={["#6a11cb", "#2575fc"]}
+            style={styles.gradientButton}
+          >
+            <TouchableOpacity
+              style={styles.buttonContent}
+              onPress={() => router.push("/(tabs)/Home/dictionary")}
+            >
+              <Ionicons name="book" size={50} color="white" />
+              <Text style={styles.buttonText}>Dictionary</Text>
             </TouchableOpacity>
           </LinearGradient>
         </Animated.View>
@@ -176,17 +164,17 @@ const styles = StyleSheet.create({
     right: 10,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.2)", // Add background for visibility
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
     padding: 5,
     borderRadius: 10,
-    zIndex: 10, // Ensure it appears above other elements
+    zIndex: 10,
   },
   iconButton: {
     marginLeft: 10,
     padding: 8,
-    backgroundColor: "#fff", // Ensure visibility
+    backgroundColor: "#fff",
     borderRadius: 20,
-    elevation: 5, // Add shadow for better visibility
+    elevation: 5,
   },
 
   /* Buttons */
@@ -201,43 +189,11 @@ const styles = StyleSheet.create({
     padding: 15,
     justifyContent: "center",
   },
-  profileButtonText: {
+  buttonText: {
     color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-    marginLeft: 10,
-  },
-
-  /* Edit Modal */
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.5)",
-  },
-  modalContent: { width: "80%", padding: 20, borderRadius: 20 },
-  modalTitle: {
-    fontSize: 20,
-    marginBottom: 10,
-    color: "#fff",
     textAlign: "center",
+    fontWeight: "600",
   },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 10,
-    marginBottom: 10,
-    borderRadius: 5,
-    backgroundColor: "#fff",
-  },
-  textArea: { height: 100 },
-  button: {
-    backgroundColor: "#2196F3",
-    padding: 10,
-    borderRadius: 5,
-    marginTop: 10,
-  },
-  buttonText: { color: "white", textAlign: "center", fontWeight: "600" },
 });
 
 export default HomeScreen;

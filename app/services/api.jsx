@@ -57,18 +57,21 @@
 //   }
 // };
 
-
-
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const API_URL = "http://localhost:5000"; // Use this for Android Emulator
-// const API_URL = "http://192.168.X.X:5000"; // Use this for real devices
+// Use local network IP instead of "localhost" (update with actual IP)
+const API_URL = "http://192.168.X.X:5000"; // Replace X.X with your actual IP
 
-// ✅ Fetch user profile
+// Fetch user profile
 export const fetchUserProfile = async () => {
   try {
     const token = await AsyncStorage.getItem("userToken");
-    if (!token) throw new Error("No authentication token found");
+    if (!token) {
+      console.error("No authentication token found");
+      throw new Error("No authentication token found");
+    }
+
+    console.log("Stored Token:", token); // Debugging token issues
 
     const response = await fetch(`${API_URL}/user/profile`, {
       method: "GET",
@@ -78,21 +81,37 @@ export const fetchUserProfile = async () => {
       },
     });
 
-    const data = await response.json();
-    console.log("API Response Data:", data); // Debug API response
+    // Check for successful response
+    if (!response.ok) {
+      const errorResponse = await response.text();
+      console.error("Fetch Error:", errorResponse); // Debugging API response error
+      if (response.status === 401) {
+        // Handle token expiry or invalidation here (e.g., prompt user to log in)
+        throw new Error("Authentication failed. Please log in again.");
+      }
+      throw new Error("Failed to fetch profile");
+    }
 
-    return data;
+    // Parse and return the response data
+    const responseData = await response.json();
+    console.log("Fetched User Data:", responseData); // Debugging the fetched data
+    return responseData;
   } catch (error) {
     console.error("fetchUserProfile Error:", error);
-    return null;
+    return null; // Return null if an error occurs
   }
 };
 
-// ✅ Update user profile
+// Update user profile
 export const updateUserProfile = async (updatedData) => {
   try {
     const token = await AsyncStorage.getItem("userToken");
-    if (!token) throw new Error("No authentication token found");
+    if (!token) {
+      console.error("No authentication token found");
+      throw new Error("No authentication token found");
+    }
+
+    console.log("Updating Profile with:", updatedData); // Debugging
 
     const response = await fetch(`${API_URL}/user/profile`, {
       method: "PUT",
@@ -103,10 +122,19 @@ export const updateUserProfile = async (updatedData) => {
       body: JSON.stringify(updatedData),
     });
 
-    return await response.json();
+    // Handle non-200 responses
+    if (!response.ok) {
+      const errorResponse = await response.text();
+      console.error("Update Error:", errorResponse); // Debugging API response error
+      throw new Error("Failed to update profile");
+    }
+
+    // Parse and return the updated profile data
+    const updatedProfile = await response.json();
+    console.log("Updated Profile Data:", updatedProfile); // Debugging the updated profile
+    return updatedProfile;
   } catch (error) {
     console.error("Error updating profile:", error);
     throw error;
   }
 };
-
