@@ -39,7 +39,7 @@ const BlogDetails: React.FC = () => {
 
   const fetchPosts = async () => {
     try {
-      const response = await api.get<Post[]>("/posts");
+      const response = await api.get<Post[]>("http://localhost:5000/posts");
       setPosts(response.data);
     } catch (err) {
       setError("Failed to fetch posts");
@@ -67,12 +67,15 @@ const BlogDetails: React.FC = () => {
       // Send the correct request (Like or Unlike)
       let response: AxiosResponse<any, any>;
       if (alreadyLiked) {
-        response = await api.delete(`/posts/${postId}/like`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        response = await api.delete(
+          `http://localhost:5000/posts/${postId}/like`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
       } else {
         response = await api.post(
-          `/posts/${postId}/like`,
+          `http://localhost:5000/posts/${postId}/like`,
           {},
           {
             headers: { Authorization: `Bearer ${token}` },

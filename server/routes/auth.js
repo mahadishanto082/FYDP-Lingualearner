@@ -1,18 +1,18 @@
 import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import User from "../models/user.js";
+import User from "../models/profile.js";
 import { body, validationResult } from "express-validator";
 // import { upload } from '../config/gridfs.js';
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const router = express.Router();
 
 // Initialize GridFS bucket
 let gfs;
-mongoose.connection.once('open', () => {
+mongoose.connection.once("open", () => {
   gfs = new mongoose.mongo.GridFSBucket(mongoose.connection.db, {
-    bucketName: 'uploads'
+    bucketName: "uploads",
   });
 });
 
@@ -29,17 +29,22 @@ const validateRegistration = [
 ];
 
 // Register a new user
-router.post("/register",  validateRegistration, async (req, res) => {
+router.post("/register", validateRegistration, async (req, res) => {
   try {
-    console.log('Received registration request');
-    console.log('Request body:', req.body);
-    console.log('File:', req.file ? {
-      fieldname: req.file.fieldname,
-      originalname: req.file.originalname,
-      mimetype: req.file.mimetype,
-      size: req.file.size,
-      path: req.file.path
-    } : 'No file uploaded');
+    console.log("Received registration request");
+    console.log("Request body:", req.body);
+    console.log(
+      "File:",
+      req.file
+        ? {
+            fieldname: req.file.fieldname,
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+            path: req.file.path,
+          }
+        : "No file uploaded"
+    );
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -56,7 +61,10 @@ router.post("/register",  validateRegistration, async (req, res) => {
         try {
           await gfs.delete(new mongoose.Types.ObjectId(req.file.id));
         } catch (deleteErr) {
-          console.error('Error deleting file after registration failure:', deleteErr);
+          console.error(
+            "Error deleting file after registration failure:",
+            deleteErr
+          );
         }
       }
       return res.status(400).json({ message: "User already exists" });
@@ -64,18 +72,18 @@ router.post("/register",  validateRegistration, async (req, res) => {
 
     // Create image URL if file was uploaded
     const imageUrl = req.file ? `/api/image/${req.file.filename}` : null;
-    console.log('Image URL:', imageUrl);
+    console.log("Image URL:", imageUrl);
 
     // Create new user
     const newUser = new User({
       name,
       email,
       password,
-      image: imageUrl
+      image: imageUrl,
     });
 
     await newUser.save();
-    console.log('User saved successfully');
+    console.log("User saved successfully");
 
     // Generate JWT token
     const token = jwt.sign({ userId: newUser._id }, process.env.JWT_SECRET, {
@@ -89,11 +97,11 @@ router.post("/register",  validateRegistration, async (req, res) => {
         id: newUser._id,
         name: newUser.name,
         email: newUser.email,
-        image: newUser.image
-      }
+        image: newUser.image,
+      },
     };
 
-    console.log('Sending response:', responseData);
+    console.log("Sending response:", responseData);
     res.status(201).json(responseData);
   } catch (err) {
     console.error("Registration error:", err);
@@ -102,14 +110,16 @@ router.post("/register",  validateRegistration, async (req, res) => {
       try {
         await gfs.delete(new mongoose.Types.ObjectId(req.file.id));
       } catch (deleteErr) {
-        console.error('Error deleting file:', deleteErr);
+        console.error("Error deleting file:", deleteErr);
       }
     }
-    if (err.message === 'Only image files are allowed!') {
+    if (err.message === "Only image files are allowed!") {
       return res.status(400).json({ message: err.message });
     }
-    if (err.name === 'MulterError') {
-      return res.status(400).json({ message: 'Error uploading file: ' + err.message });
+    if (err.name === "MulterError") {
+      return res
+        .status(400)
+        .json({ message: "Error uploading file: " + err.message });
     }
     res.status(500).json({ message: "Server error: " + err.message });
   }
@@ -119,16 +129,16 @@ router.post("/register",  validateRegistration, async (req, res) => {
 router.get("/user/profile", async (req, res) => {
   try {
     // Get token from header
-    const token = req.headers.authorization?.split(' ')[1];
+    const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       return res.status(401).json({ message: "No token provided" });
     }
 
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
     // Get user data
-    const user = await User.findById(decoded.userId).select('-password');
+    const user = await User.findById(decoded.userId).select("-password");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -136,7 +146,7 @@ router.get("/user/profile", async (req, res) => {
     res.json(user);
   } catch (error) {
     console.error("Error fetching user profile:", error);
-    if (error.name === 'JsonWebTokenError') {
+    if (error.name === "JsonWebTokenError") {
       return res.status(401).json({ message: "Invalid token" });
     }
     res.status(500).json({ message: "Server error" });
@@ -152,8 +162,8 @@ router.get("/image/:filename", async (req, res) => {
     }
 
     // Set proper content type
-    res.set('Content-Type', file[0].contentType);
-    
+    res.set("Content-Type", file[0].contentType);
+
     // Create read stream and pipe to response
     const readStream = gfs.openDownloadStreamByName(req.params.filename);
     readStream.pipe(res);
@@ -194,15 +204,15 @@ router.post("/login", async (req, res) => {
     });
 
     // Respond with success, token, and user data
-    res.json({ 
-      message: "Login successful", 
+    res.json({
+      message: "Login successful",
       token,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
-        image: user.image
-      }
+        image: user.image,
+      },
     });
   } catch (error) {
     console.error("Login error:", error);

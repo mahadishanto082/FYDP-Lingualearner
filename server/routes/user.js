@@ -1,5 +1,5 @@
 import express from "express";
-import User from "../models/user.js";
+ import User from "../models/profile.js";
 import authMiddleware from "../middleware/authMiddleware.js"; // Ensure you have authentication middleware
 
 const router = express.Router();
@@ -18,7 +18,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
   }
 });
 
-router.put("/profile", authMiddleware, async (req, res) => {
+router.put("user/profile", authMiddleware, async (req, res) => {
   try {
     const { name, email, language, level, profileImage } = req.body;
     const user = await User.findById(req.user.userId);

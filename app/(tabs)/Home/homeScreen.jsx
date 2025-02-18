@@ -35,7 +35,7 @@ const buttons = [
   {
     label: "Write Blog",
     icon: "pencil",
-    path: "/(tabs)/blog/createBlog",
+    path: "/blog/createBlog",
     colors: ["#26de81", "#20bf6b"],
   },
   {
@@ -43,6 +43,12 @@ const buttons = [
     icon: "clipboard-outline",
     path: "./quizzes",
     colors: ["#00d2ff", "#00b3e6"],
+  },
+  {
+    label: "Translator",
+    icon: "language-outline",
+    path: "./translator",
+    colors: ["#ff9800", "#ff5722"],
   },
 ];
 

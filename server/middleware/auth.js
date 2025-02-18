@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import User from "../models/user.js"; // Ensure correct case
+import User from "../models/profile.js"; // Ensure correct case
 
 const auth = async (req, res, next) => {
   try {

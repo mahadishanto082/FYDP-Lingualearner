@@ -14,7 +14,7 @@ const commentSchema = new Schema(
   { timestamps: true }
 );
 
-const postSchema = new mongoose.Schema(
+const postSchema = new Schema(
   {
     title: { type: String, required: true, trim: true, maxLength: 200 },
     content: { type: String, required: true, trim: true },
@@ -31,5 +31,6 @@ const postSchema = new mongoose.Schema(
 
 postSchema.index({ title: "text", content: "text" });
 
-const Post = mongoose.model("Post", postSchema);
+// ✅ Fix OverwriteModelError
+const Post = mongoose.models.Post || mongoose.model("Post", postSchema);
 export default Post;

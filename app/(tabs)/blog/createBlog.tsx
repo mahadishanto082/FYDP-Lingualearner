@@ -14,7 +14,7 @@ import {
 import { useRouter } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons, FontAwesome } from "@expo/vector-icons";
-import apiClient from "../../services/api";
+import {apiClient} from "../../services/api";
 
 const CreateBlog: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -115,6 +115,7 @@ const CreateBlog: React.FC = () => {
           <TouchableOpacity
             style={[styles.button, loading && styles.buttonDisabled]}
             onPress={handleSubmit}
+            
             disabled={loading}
           >
             {loading ? (

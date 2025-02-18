@@ -48,39 +48,39 @@ const ProfileScreen = () => {
     fetchProfile();
   }, []);
 
-  const handleImagePick = async () => {
-    try {
-      const token = await AsyncStorage.getItem("userToken");
-      if (!token) {
-        Alert.alert("Error", "Not authenticated. Please log in again.");
-        return;
-      }
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1],
-        quality: 1,
-      });
-      if (!result.canceled && result.assets.length > 0) {
-        const { uri } = result.assets[0];
-        try {
-          setLoading(true);
-          const imageUrl = await uploadProfilePicture(uri, token);
-          setProfile((prev) => ({ ...prev, profileImage: imageUrl }));
-        } catch (error) {
-          Alert.alert(
-            "Upload Failed",
-            "Could not upload image. Please try again."
-          );
-        } finally {
-          setLoading(false);
-        }
-      }
-    } catch (error) {
-      console.error("Error picking image:", error);
-      Alert.alert("Error", "Failed to pick image");
-    }
-  };
+  // const handleImagePick = async () => {
+  //   try {
+  //     const token = await AsyncStorage.getItem("userToken");
+  //     if (!token) {
+  //       Alert.alert("Error", "Not authenticated. Please log in again.");
+  //       return;
+  //     }
+  //     const result = await ImagePicker.launchImageLibraryAsync({
+  //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //       allowsEditing: true,
+  //       aspect: [1, 1],
+  //       quality: 1,
+  //     });
+  //     if (!result.canceled && result.assets.length > 0) {
+  //       const { uri } = result.assets[0];
+  //       try {
+  //         setLoading(true);
+  //         const imageUrl = await uploadProfilePicture(uri, token);
+  //         setProfile((prev) => ({ ...prev, profileImage: imageUrl }));
+  //       } catch (error) {
+  //         Alert.alert(
+  //           "Upload Failed",
+  //           "Could not upload image. Please try again."
+  //         );
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error("Error picking image:", error);
+  //     Alert.alert("Error", "Failed to pick image");
+  //   }
+  // };
 
   return (
     <ScrollView style={styles.container}>
@@ -98,8 +98,8 @@ const ProfileScreen = () => {
       ) : (
         <View style={styles.profileContainer}>
           <TouchableOpacity
-            onPress={handleImagePick}
-            style={styles.profileImageContainer}
+            // onPress={handleImagePick}
+            // style={styles.profileImageContainer}
           >
             <Image
               source={{
